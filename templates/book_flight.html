@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center fade-in">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0 mt-5">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                        <i class="bi bi-ticket-perforated fs-1"></i>
+                    </div>
+                    <h2 class="fw-bold">Book Flight</h2>
+                    <p class="text-secondary mb-1">Flight {{ flight.flight_number }} | {{ flight.origin }} to {{ flight.destination }}</p>
+                    <div class="badge bg-success bg-opacity-10 text-success px-3 py-2 fs-6 mt-2">₹{{ flight.price|floatformat:"0" }} per seat</div>
+                </div>
+
+                <div id="alertBox"></div>
+
+                <form method="post" onsubmit="return validateBookingForm();">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="id_seats" class="form-label">Number of Seats</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-person-plus text-secondary"></i></span>
+                            <input type="number" name="seats" id="id_seats" class="form-control border-start-0" min="1" max="{{ flight.available_seats }}" value="1" required oninput="updateTotalPrice()">
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <div class="form-text text-secondary">
+                                Maximum {{ flight.available_seats }} seats available.
+                            </div>
+                            <div class="fw-bold text-primary">
+                                Total: ₹<span id="totalPrice">{{ flight.price|floatformat:"0" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary py-2 fw-bold">Confirm Booking</button>
+                        <a href="{% url 'flight_detail' flight.id %}" class="btn btn-outline-secondary py-2">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Wrapped in Number("") to prevent VS Code Javascript syntax warnings 
+const flightPrice = Number("{{ flight.price }}");
+
+function updateTotalPrice() {
+    const seats = parseInt(document.getElementById("id_seats").value) || 0;
+    const total = seats * flightPrice;
+    document.getElementById("totalPrice").innerText = total.toLocaleString('en-IN');
+}
+
+function validateBookingForm() {
+    const seats = parseInt(document.getElementById("id_seats").value);
+    const maxSeats = Number("{{ flight.available_seats }}");
+    if (seats <= 0 || seats > maxSeats) {
+        document.getElementById("alertBox").innerHTML = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle me-2"></i>Please enter a valid number of seats (1 to ${maxSeats}).
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+        return false;
+    }
+    return true;
+}
+</script>
+{% endblock %}

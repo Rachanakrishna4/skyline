@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center fade-in">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0 mt-5">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                        <i class="bi bi-person-fill fs-1"></i>
+                    </div>
+                    <h2 class="fw-bold">Welcome Back</h2>
+                    <p class="text-secondary">Please sign in to your SkyGlide account</p>
+                </div>
+
+                <form method="post" action="{% url 'login' %}" novalidate>
+                    {% csrf_token %}
+                    {% if request.GET.next %}
+                      <input type="hidden" name="next" value="{{ request.GET.next }}">
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-person text-secondary"></i></span>
+                            <input type="text" class="form-control border-start-0" id="username" name="username" placeholder="Enter username" required>
+                        </div>
+                        <div class="invalid-feedback">Please enter your username.</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-lock text-secondary"></i></span>
+                            <input type="password" class="form-control border-start-0" id="password" name="password" placeholder="Enter password" required>
+                        </div>
+                        <div class="invalid-feedback">Please enter your password.</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold mb-3">Sign In</button>
+                    
+                    <div class="text-center">
+                        <p class="text-secondary mb-0">Don't have an account? <a href="{% url 'register' %}" class="text-primary text-decoration-none fw-bold">Sign Up</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Bootstrap client-side validation script
+(() => {
+  'use strict'
+  const forms = document.querySelectorAll('form')
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+      form.classList.add('was-validated')
+    }, false)
+  })
+})()
+</script>
+{% endblock %}

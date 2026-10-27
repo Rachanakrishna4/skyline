@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-5 fade-in">
+    <a href="{% url 'home' %}" class="btn btn-link text-secondary p-0 mb-3 text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i> Back to Home
+    </a>
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="serif-title mb-0">All Available Flights</h2>
+        <div class="search-box" style="width: 350px;">
+            <div class="input-group" style="box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-radius: 9999px; overflow: hidden;">
+                <span class="input-group-text border-0 bg-white ps-4"><i class="bi bi-search text-secondary"></i></span>
+                <input type="text" id="flightSearch" class="form-control border-0" placeholder="Search cities (e.g. Mumbai)..." style="box-shadow: none;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 fade-in delay-1" id="flightList">
+    {% for flight in flights %}
+    <div class="col-md-6 col-lg-4 flight-item" data-destination="{{ flight.destination|lower }}" data-origin="{{ flight.origin|lower }}">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title m-0"><i class="bi bi-ticket-detailed text-primary me-2"></i>{{ flight.flight_number }}</h5>
+                    <div class="text-end">
+                        <div class="fs-5 fw-bold text-success mb-1">₹{{ flight.price|floatformat:"0" }}</div>
+                        <span class="flight-status"><i class="bi bi-person-check-fill"></i> {{ flight.available_seats }} left</span>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center justify-content-between mb-3 flight-info-box p-3 rounded">
+                    <div class="text-center">
+                        <div class="h5 m-0">{{ flight.origin }}</div>
+                        <small class="text-secondary">{{ flight.departure_time|date:"H:i" }}</small>
+                    </div>
+                    <div class="text-center flex-grow-1 px-3">
+                        <i class="bi bi-arrow-right text-secondary fs-4"></i>
+                        <div class="text-secondary" style="font-size: 0.75rem;">{{ flight.departure_time|date:"M d" }}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="h5 m-0">{{ flight.destination }}</div>
+                        <small class="text-secondary">{{ flight.arrival_time|date:"H:i" }}</small>
+                    </div>
+                </div>
+
+                <div class="mt-auto d-flex gap-2">
+                    <a href="{% url 'flight_detail' flight.id %}" class="btn btn-outline-primary flex-grow-1">Details</a>
+                    <a href="{% url 'book_flight' flight.id %}" class="btn btn-primary flex-grow-1">Book</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <i class="bi bi-airplane text-secondary" style="font-size: 3rem;"></i>
+        <p class="mt-3 text-secondary">No flights currently available.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document.getElementById('flightSearch').addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase().trim();
+    const items = document.querySelectorAll('.flight-item');
+    let hasVisible = false;
+    
+    items.forEach(item => {
+        const dest = item.getAttribute('data-destination');
+        const orig = item.getAttribute('data-origin');
+        if (dest.includes(term) || orig.includes(term)) {
+            item.style.display = 'block';
+            hasVisible = true;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    let noResultsMsg = document.getElementById('noResultsMsg');
+    if (!hasVisible && items.length > 0) {
+        if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.id = 'noResultsMsg';
+            noResultsMsg.className = 'col-12 text-center py-5 fade-in';
+            noResultsMsg.innerHTML = '<i class="bi bi-search text-secondary" style="font-size: 3rem;"></i><p class="mt-3 text-secondary fs-5">No flights found matching your search.</p>';
+            document.getElementById('flightList').appendChild(noResultsMsg);
+        } else {
+            noResultsMsg.style.display = 'block';
+        }
+    } else if (noResultsMsg) {
+        noResultsMsg.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}
